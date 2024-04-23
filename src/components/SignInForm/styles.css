@@ -1,0 +1,10 @@
+#sign-in-form-container form {
+    display: flex;
+    flex-direction: column;
+    width: 320px;
+}
+
+#sign-in-form-container form input[type="submit"] {
+    color: white;
+    background-color: #35b8b9;
+}
