@@ -1,8 +1,13 @@
 import React from 'react'
+import { Outlet } from 'react-router-dom'
+import Navigation from '@components/Navigation'
 
 const MainPage = () => {
     return (
-        <main id="page-main">main page</main>
+        <main id="page-main">
+            <Navigation />
+            <Outlet />
+        </main>
     )
 }
 
