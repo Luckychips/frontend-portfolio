@@ -6,12 +6,13 @@ import {
     format, utcFormat, max,
 } from 'd3'
 import BarChart from '@components/Chart/BarChart'
-import json from './data.json'
+import RaceBarChart from '@components/Chart/RaceBarChart'
 
 const D3Charts = () => {
     return (
         <>
             <BarChart />
+            <RaceBarChart />
         </>
     )
 }
