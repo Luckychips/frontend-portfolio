@@ -2,12 +2,26 @@ import React, { useEffect, useRef } from 'react'
 import {
     select, ascending, descending, rollup, pairs, groups, interpolateNumber, format, utcFormat,
     axisTop,
-    scaleOrdinal, schemeTableau10
+    scaleOrdinal, schemeTableau10,
+    scaleLinear, scaleBand, range, easeLinear,
 } from 'd3'
 import json from './json/data.json'
 import './styles.css'
 
 const RaceBarChart = () => {
+    const width = 750
+    const height = 500
+    const barSize = 48
+    const marginTop = 16
+    const marginBottom = 6
+    const marginLeft = 0
+    const marginRight = 6
+    const tickFormat = undefined
+    const x = scaleLinear([0, 1], [marginLeft, width - marginRight])
+    const y = scaleBand()
+        .domain(range(12 + 1))
+        .rangeRound([marginTop, marginTop + barSize * (12 + 1 + 0.1)])
+        .padding(0.1)
     const ref = useRef<any>()
 
     const getRank = (value) => {
@@ -44,22 +58,24 @@ const RaceBarChart = () => {
         return keyframes
     }
 
-    const bars = (svg, prev, next) => {
-        const color = () => {
-            const scale = scaleOrdinal(schemeTableau10)
-            if (json.some(d => d.category !== undefined)) {
-                const categoryByName = new Map(json.map(d => [d.name, d.category]))
-                scale.domain(categoryByName.values())
-                return d => scale(categoryByName.get(d.name))
-            }
-            return d => scale(d.name)
+    const getColors = () => {
+        const scale = scaleOrdinal(schemeTableau10)
+        if (json.some(d => d.category !== undefined)) {
+            const categoryByName = new Map(json.map(d => [d.name, d.category]))
+            scale.domain(categoryByName.values())
+            return d => scale(categoryByName.get(d.name))
         }
+
+        return d => scale(d.name)
+    }
+
+    const bars = (svg, prev, next) => {
         const bar = svg.append('g').attr('fill-opacity', 0.6).selectAll('rect')
         return ([date, data], transition) => (bar) = bar
             .data(data.slice(0, 12), d => d.name)
             .join(
                 enter => enter.append('rect')
-                    .attr('fill', color)
+                    .attr('fill', getColors())
                     .attr('height', y.bandwidth())
                     .attr('x', x(0))
                     .attr('y', d => y((prev.get(d) || d).rank))
@@ -121,14 +137,21 @@ const RaceBarChart = () => {
     }
 
     const textTween = (a, b) => {
+        const formatNumber = (t) => {
+            return format(',d')
+        }
+
         const i = interpolateNumber(a, b);
         return function(t) {
-            this.textContent = format(',d')
-            // this.textContent = formatNumber(i(t));
+            this.textContent = formatNumber(i(t));
         };
     }
 
-    const ticker = (svg) => {
+    const ticker = (svg, keyframes) => {
+        const formatDate = (e) => {
+            return utcFormat('%Y')
+        }
+
         const now = svg.append('text')
             .style('font', `bold ${barSize}px var(--sans-serif)`)
             .style('font-variant-numeric', 'tabular-nums')
@@ -156,14 +179,26 @@ const RaceBarChart = () => {
                 const updateBars = bars(svg, prev, next)
                 const updateAxis = axis(svg)
                 const updateLabels = labels(svg, prev, next)
-                const updateTicker = ticker(svg)
+                const updateTicker = ticker(svg, keyframes)
+
+                for (const keyframe of keyframes) {
+                    const transition = svg.transition().duration(250).ease(easeLinear)
+                    x.domain([0, keyframe[1][0].value]);
+
+                    updateAxis(keyframe, transition);
+                    updateBars(keyframe, transition);
+                    updateLabels(keyframe, transition);
+                    updateTicker(keyframe, transition);
+
+                    await transition.end();
+                }
             }
         })()
     }, [ref, json])
 
     return (
         <section className="d3-race-bar-chart">
-            <svg ref={ref} width={750} height={500} />
+            <svg ref={ref} width={width} height={height} />
         </section>
     )
 }
