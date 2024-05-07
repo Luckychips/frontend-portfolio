@@ -71,7 +71,7 @@ const RaceBarChart = () => {
 
     const bars = (svg, prev, next) => {
         const bar = svg.append('g').attr('fill-opacity', 0.6).selectAll('rect')
-        return ([date, data], transition) => (bar) = bar
+        return ([date, data], transition) => bar
             .data(data.slice(0, 12), d => d.name)
             .join(
                 enter => enter.append('rect')
@@ -106,13 +106,13 @@ const RaceBarChart = () => {
     }
 
     const labels = (svg, prev, next) => {
-        let label = svg.append('g')
+        const label = svg.append('g')
             .style('font', 'bold 12px var(--sans-serif)')
             .style('font-variant-numeric', 'tabular-nums')
             .attr('text-anchor', 'end')
             .selectAll('text')
 
-        return ([date, data], transition) => label = label
+        return ([date, data], transition) => label
             .data(data.slice(0, 12), d => d.name)
             .join(
                 enter => enter.append('text')
@@ -138,12 +138,13 @@ const RaceBarChart = () => {
 
     const textTween = (a, b) => {
         const formatNumber = (t) => {
-            return format(',d')
+            return format(t)
         }
 
-        const i = interpolateNumber(a, b);
+        const i = interpolateNumber(a, b)
         return function(t) {
-            this.textContent = formatNumber(i(t));
+            this.textContent = ''
+            // this.textContent = formatNumber(i(t))
         };
     }
 
@@ -162,8 +163,7 @@ const RaceBarChart = () => {
             .text(formatDate(keyframes[0][0]))
 
         return ([date], transition) => {
-            // transition.end().then(() => now.text(formatDate(date)));
-            transition.end().then(() => now.text(utcFormat('%Y')))
+            transition.end().then(() => now.text(formatDate(date)))
         };
     }
 
@@ -183,14 +183,14 @@ const RaceBarChart = () => {
 
                 for (const keyframe of keyframes) {
                     const transition = svg.transition().duration(250).ease(easeLinear)
-                    x.domain([0, keyframe[1][0].value]);
+                    x.domain([0, keyframe[1][0].value])
 
-                    updateAxis(keyframe, transition);
-                    updateBars(keyframe, transition);
-                    updateLabels(keyframe, transition);
-                    updateTicker(keyframe, transition);
+                    updateAxis(keyframe, transition)
+                    updateBars(keyframe, transition)
+                    updateLabels(keyframe, transition)
+                    updateTicker(keyframe, transition)
 
-                    await transition.end();
+                    await transition.end()
                 }
             }
         })()
