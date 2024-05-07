@@ -178,17 +178,17 @@ const RaceBarChart = () => {
 
                 const updateBars = bars(svg, prev, next)
                 const updateAxis = axis(svg)
-                const updateLabels = labels(svg, prev, next)
-                const updateTicker = ticker(svg, keyframes)
+                // const updateLabels = labels(svg, prev, next)
+                // const updateTicker = ticker(svg, keyframes)
 
                 for (const keyframe of keyframes) {
-                    const transition = svg.transition().duration(250).ease(easeLinear)
+                    const transition = svg.transition().duration(500).ease(easeLinear)
                     x.domain([0, keyframe[1][0].value])
 
-                    updateAxis(keyframe, transition)
                     updateBars(keyframe, transition)
-                    updateLabels(keyframe, transition)
-                    updateTicker(keyframe, transition)
+                    updateAxis(keyframe, transition)
+                    // updateLabels(keyframe, transition)
+                    // updateTicker(keyframe, transition)
 
                     await transition.end()
                 }
