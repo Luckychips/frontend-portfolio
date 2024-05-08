@@ -56,7 +56,7 @@ const BarChart = () => {
             );
         }
 
-        setInterval(int, 1000)
+        setInterval(int, 500)
         return () => { clearInterval(int) }
     }, [])
 
