@@ -56,7 +56,7 @@ const BarChart = () => {
             );
         }
 
-        setInterval(int, 500)
+        setInterval(int, 1000)
         return () => { clearInterval(int) }
     }, [])
 
@@ -64,6 +64,7 @@ const BarChart = () => {
         (async () => {
             if (data) {
                 const svg = select(ref.current)
+                data.sort((a, b) => b.value - a.value)
                 const yScale = scaleBand()
                     .paddingInner(0.4)
                     .domain(data.map((value, index) => index))

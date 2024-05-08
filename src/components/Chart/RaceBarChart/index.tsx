@@ -33,18 +33,18 @@ const RaceBarChart = () => {
     }
 
     const getDateFormat = (date) => {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, '0');
-        const day = date.getDate().toString().padStart(2, '0');
-        return year + '-' + month + '-' + day;
+        const year = date.getFullYear()
+        const month = (date.getMonth() + 1).toString().padStart(2, '0')
+        const day = date.getDate().toString().padStart(2, '0')
+        return year + '-' + month + '-' + day
     }
 
     const getKeyframes = () => {
         const datevalues = Array.from(rollup(json, ([d]) => d.value, d => d.date, d => d.name))
-            .map(([date, data]) => [getDateFormat(new Date(date)), data])
+            .map(([date, data]) => [date, data])
             .sort(([a], [b]) => ascending(a, b))
-        const keyframes = [];
-        let ka, a, kb, b;
+        const keyframes = []
+        let ka, a, kb, b
         for ([[ka, a], [kb, b]] of pairs(datevalues)) {
             for (let i = 0; i < 10; i++) {
                 const t = i / 10
@@ -91,7 +91,7 @@ const RaceBarChart = () => {
     }
 
     const axis = (svg) => {
-        const g = svg.append('g').attr('transform', `translate(0,${marginTop})`);
+        const g = svg.append('g').classed('axis-tick-labels', true).attr('transform', `translate(0,${marginTop})`)
         const axis = axisTop(x)
             .ticks(width / 160, tickFormat)
             .tickSizeOuter(0)
@@ -100,7 +100,9 @@ const RaceBarChart = () => {
         return (_, transition) => {
             g.transition(transition).call(axis)
             g.select('.tick:first-of-type text').remove()
+            // remove y tick line
             g.selectAll('.tick:not(:first-of-type) line').attr('stroke', 'white')
+            // remove x axis line
             g.select('.domain').remove()
         };
     }
@@ -143,8 +145,7 @@ const RaceBarChart = () => {
 
         const i = interpolateNumber(a, b)
         return function(t) {
-            this.textContent = ''
-            // this.textContent = formatNumber(i(t))
+            this.textContent = formatNumber(i(t))
         };
     }
 
@@ -164,7 +165,7 @@ const RaceBarChart = () => {
 
         return ([date], transition) => {
             transition.end().then(() => now.text(formatDate(date)))
-        };
+        }
     }
 
     useEffect(() => {
@@ -178,8 +179,8 @@ const RaceBarChart = () => {
 
                 const updateBars = bars(svg, prev, next)
                 const updateAxis = axis(svg)
-                // const updateLabels = labels(svg, prev, next)
-                // const updateTicker = ticker(svg, keyframes)
+                const updateLabels = labels(svg, prev, next)
+                const updateTicker = ticker(svg, keyframes)
 
                 for (const keyframe of keyframes) {
                     const transition = svg.transition().duration(500).ease(easeLinear)
@@ -187,8 +188,8 @@ const RaceBarChart = () => {
 
                     updateBars(keyframe, transition)
                     updateAxis(keyframe, transition)
-                    // updateLabels(keyframe, transition)
-                    // updateTicker(keyframe, transition)
+                    updateLabels(keyframe, transition)
+                    updateTicker(keyframe, transition)
 
                     await transition.end()
                 }
